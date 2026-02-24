@@ -1,0 +1,69 @@
+buildscript {
+    ext.kotlin_version = '2.1.0'
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.9.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+rootProject.buildDir = '../build'
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+// Fix for plugins (e.g. image_gallery_saver) that don't set namespace (required by AGP 8+)
+subprojects { subproject ->
+    def applyNamespaceFix = {
+        if (subproject.plugins.hasPlugin("com.android.library")) {
+            if (subproject.android.namespace == null || subproject.android.namespace.isEmpty()) {
+                def manifest = subproject.file("src/main/AndroidManifest.xml")
+                if (manifest.exists()) {
+                    def pkg = new XmlSlurper().parse(manifest).@package.text()
+                    if (pkg) subproject.android.namespace = pkg
+                }
+            }
+        }
+    }
+    if (subproject.state.executed) {
+        applyNamespaceFix.call()
+    } else {
+        subproject.afterEvaluate { applyNamespaceFix.call() }
+    }
+}
+// Align JVM target to 1.8 for all Android subprojects (avoids Java 1.8 vs Kotlin 21 mismatch)
+subprojects { subproject ->
+    def applyJvmTarget = {
+        if (subproject.plugins.hasPlugin("com.android.library") || subproject.plugins.hasPlugin("com.android.application")) {
+            subproject.android.compileOptions {
+                sourceCompatibility JavaVersion.VERSION_1_8
+                targetCompatibility JavaVersion.VERSION_1_8
+            }
+            subproject.tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+                kotlinOptions { jvmTarget = "1.8" }
+            }
+        }
+    }
+    if (subproject.state.executed) {
+        applyJvmTarget.call()
+    } else {
+        subproject.afterEvaluate { applyJvmTarget.call() }
+    }
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}
