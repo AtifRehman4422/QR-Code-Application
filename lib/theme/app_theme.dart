@@ -7,11 +7,12 @@ class AppTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      // Softer, modern blue for primary and very light background
       primaryColor: const Color(0xFF2563EB),
-      scaffoldBackgroundColor: const Color(0xFFF8FAFC),
+      scaffoldBackgroundColor: const Color(0xFFF9FBFF),
       colorScheme: ColorScheme.light(
         primary: const Color(0xFF2563EB),
-        secondary: const Color(0xFF0EA5E9),
+        secondary: const Color(0xFF22C1C3),
         surface: Colors.white,
         error: const Color(0xFFDC2626),
         onPrimary: Colors.white,
@@ -39,7 +40,7 @@ class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           elevation: 0,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -58,6 +59,12 @@ class AppTheme {
         bodyMedium: GoogleFonts.poppins(color: const Color(0xFF64748B)),
       ),
       iconTheme: const IconThemeData(color: Color(0xFF475569), size: 24),
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: ZoomPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
     );
   }
 
