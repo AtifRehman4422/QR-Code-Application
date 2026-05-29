@@ -26,10 +26,26 @@ def flutterVersionName = localProperties.getProperty('flutter.versionName')
 if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+def admobProperties = new Properties()
+def admobPropertiesFile = rootProject.file('admob.properties')
+if (admobPropertiesFile.exists()) {
+    admobProperties.load(new FileInputStream(admobPropertiesFile))
+}
+def admobAppId = admobProperties.getProperty(
+    'admobAppId',
+    'ca-app-pub-7706538461271047~1352701036'
+)
 
 android {
     namespace "com.arrehman.qr_scanner_app"
-    compileSdkVersion flutter.compileSdkVersion
+    // Play now requires latest API optimizations (targetSdk >= 35).
+    compileSdkVersion 36
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -47,25 +63,43 @@ android {
 
     defaultConfig {
          multiDexEnabled true
+        manifestPlaceholders += [admobAppId: admobAppId]
         // Unique application ID used on Google Play.
         applicationId "com.arrehman.qr_scanner_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion flutter.minSdkVersion
-        targetSdkVersion 33
+        // 26+ required by androidx.javascriptengine (AdMob WebView/JS engine)
+        minSdkVersion 26
+        targetSdkVersion 36
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
 
-    buildTypes {
+    signingConfigs {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            // Resolve path relative to android/ (rootProject), not android/app/
+            storeFile keystoreProperties['storeFile'] ? rootProject.file(keystoreProperties['storeFile']) : null
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+    buildTypes {
+        debug {
+            manifestPlaceholders += [admobAppId: admobAppId]
+        }
+        release {
+            signingConfig signingConfigs.release
         }
     }
 }
 
 flutter {
     source '../..'
+}
+
+dependencies {
+    // Fixes AdMob "Unable to obtain a JavascriptEngine" on some Android devices
+    implementation 'androidx.javascriptengine:javascriptengine:1.0.0'
+    implementation 'androidx.webkit:webkit:1.12.1'
 }

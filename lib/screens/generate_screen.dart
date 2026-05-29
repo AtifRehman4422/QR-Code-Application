@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:cross_file/cross_file.dart';
+import '../ads/ad_service.dart';
 import '../models/qr_code_model.dart';
 import '../utils/file_storage.dart';
 import '../utils/qr_scanner.dart';
@@ -65,6 +66,14 @@ class _GenerateScreenState extends State<GenerateScreen> {
       Get.snackbar('Error', 'Enter some content first');
       return;
     }
+
+    AdService.instance.showInterstitial(
+      onComplete: () => _showGeneratedQr(text),
+    );
+  }
+
+  void _showGeneratedQr(String text) {
+    if (!mounted) return;
     setState(() {
       _data = text;
       _generated = true;

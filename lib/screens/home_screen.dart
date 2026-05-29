@@ -1,24 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import '../theme/theme_manager.dart';
 import '../utils/file_storage.dart';
-import '../widgets/custom_button.dart';
+import '../widgets/banner_ad_widget.dart';
 import 'generate_screen.dart';
 import 'history_screen.dart';
 import 'scan_screen.dart';
 import 'settings_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final themeManager = Get.find<ThemeManager>();
 
     return Scaffold(
-      body: CustomScrollView(
+      body: Column(
+        children: [
+          Expanded(
+            child: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 160,
@@ -119,6 +125,10 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
           ),
+        ],
+            ),
+          ),
+          const BannerAdWidget(),
         ],
       ),
     );

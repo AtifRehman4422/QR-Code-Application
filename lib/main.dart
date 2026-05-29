@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'ads/ad_service.dart';
 import 'database/hive_boxes.dart';
 import 'theme/app_theme.dart';
 import 'theme/theme_manager.dart';
@@ -14,6 +15,7 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
   await HiveBoxes.init();
+  await AdService.instance.initialize();
   runApp(const QRScannerApp());
 }
 

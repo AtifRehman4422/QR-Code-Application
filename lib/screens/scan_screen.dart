@@ -6,6 +6,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
+import '../ads/ad_service.dart';
 import '../models/qr_code_model.dart';
 import '../utils/file_storage.dart';
 import '../utils/qr_scanner.dart';
@@ -54,7 +55,7 @@ class _ScanScreenState extends State<ScanScreen> {
     final code = list.first.rawValue;
     if (code == null || code.isEmpty) return;
     _scanned = true;
-    setState(() => _lastResult = code);
+
     final type = categorizeQrContent(code);
     final model = QrCodeModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -63,7 +64,14 @@ class _ScanScreenState extends State<ScanScreen> {
       source: QrSource.scan,
       timestamp: DateTime.now(),
     );
-    await FileStorage.saveQr(model);
+
+    await AdService.instance.showInterstitial(
+      onComplete: () {
+        if (!mounted) return;
+        setState(() => _lastResult = code);
+        FileStorage.saveQr(model);
+      },
+    );
   }
 
   void _reset() {
